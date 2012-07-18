@@ -1,4 +1,20 @@
-#!/usr/bin/python -tt
+#!/usr/bin/env python
+# jpegpixi.py - a GIMP script to use jpegpixi
+#
+#   Copyright 2012 Aleksej
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 from os import system
 from gimpfu import *
@@ -7,8 +23,9 @@ def python_pixi(timg, tdrawable, method, direction,
                 max_selection_size, rename_method, fn_sufbase):
     have_selection = pdb.gimp_selection_bounds(timg)[0]
 
-    # The grid spacing needed to match DCT blocks (to choose a less
-    # lossy position).
+    # The grid spacing needed to match DCT blocks (to help user choose
+    # a less lossy position).
+    #
     # Wikipedia says DCT blocks are 8x8.  It also says some lossless
     # operations can be performed on MCU blocks, which are usually
     # 16x16.  If it's only MCU and not DCT, it would be more
@@ -33,6 +50,7 @@ def python_pixi(timg, tdrawable, method, direction,
     else:
         we_have_a_selection(timg, tdrawable, method, direction,
                             max_selection_size, fn_sufbase, rename_method)
+        return
 
 
 def we_have_a_selection(timg, tdrawable, method, direction,
@@ -49,7 +67,8 @@ def we_have_a_selection(timg, tdrawable, method, direction,
     else:
         # source and target file names
         sfname = pdb.gimp_image_get_filename(timg)
-        tfname = next_filename(sfname, rename_method, fn_sufbase, (x1, y1, sx, sy))
+        tfname = next_filename(sfname, rename_method, fn_sufbase,
+                               (x1, y1, sx, sy))
 
         coord_string = "%i,%i,%i,%i" % (x1, y1, sx, sy)
         the_command = jpegpixi_cmd(sfname, tfname, coord_string,
@@ -69,20 +88,20 @@ def we_have_a_selection(timg, tdrawable, method, direction,
         return
 
 
-# Maybe this function should simply generate the suffix from the coordinates,
-# and add it like cropgui does  It could also simply add "-pixi" every time,
-# but since existing files are overwritten.
-
 def next_filename(sfname, rename_method, fn_sufbase, coords):
+    """Generates the target filename out of the source one and other
+    data using the method specified.
+    """    
     sfname_base, sfname_ext = sfname.rsplit('.', 2)
-
 
     if rename_method == 'rect_coords':
         id_from_coord_string = 'x'.join(map(lambda x: str(x), coords))
-        tfname = sfname_base + fn_sufbase + id_from_coord_string + "." + sfname_ext
+        tfname = (sfname_base + fn_sufbase + id_from_coord_string + "." +
+            sfname_ext)
     elif rename_method == 'rect_coords_hex':
         id_from_coord_string = 'x'.join(map(lambda x: hex(x), coords))
-        tfname = sfname_base + fn_sufbase + id_from_coord_string + "." + sfname_ext
+        tfname = (sfname_base + fn_sufbase + id_from_coord_string + "." +
+            sfname_ext)
     elif rename_method == 'incremental':
         tfname = next_filename_incremental(sfname_base, sfname_ext, fn_sufbase)
     else:
@@ -92,9 +111,11 @@ def next_filename(sfname, rename_method, fn_sufbase, coords):
     return tfname
 
 def next_filename_incremental(sfname_base, sfname_ext, fn_sufbase):
-
-    fn_presuf, fn_hopefully_sufbase, fn_hopefully_number = sfname_base.rpartition(
-        fn_sufbase)
+    """If the file name base ends in "-pixi<n>", makes it "-pixi<n+1>".  Adds
+    "-pixi1" if there is no "-pixi".
+    """
+    (fn_presuf, fn_hopefully_sufbase,
+        fn_hopefully_number) = sfname_base.rpartition(fn_sufbase)
 
     if fn_presuf == "":
         tfname = sfname_base + fn_sufbase + '1.' + sfname_ext
@@ -106,9 +127,10 @@ def next_filename_incremental(sfname_base, sfname_ext, fn_sufbase):
     return tfname
 
 
-# Takes coordinates of two angles of a rectangle, and replaces those of the
-# second one with the rectangle's dimensions.
 def rect_coords(points_coords):
+    """Takes coordinates of two angles of a rectangle, and replaces
+    those of the second one with the rectangle's dimensions.
+    """
     x1, y1, x2, y2 = points_coords
     sx = x2 - x1
     sy = y2 - y1
@@ -116,19 +138,30 @@ def rect_coords(points_coords):
 
 
 def jpegpixi_cmd(sfname, tfname, coord_string, method, direction):
-    return ("jpegpixi -m %s %s %s %s:%s" %
-        (method, shellquote(sfname), shellquote(tfname), direction,
-        coord_string))
+    """Returns the shell command ready to execute."""
+    progname = "jpegpixi"
+    cmdl_opts = cmdl_method = "-m " + method
+    cmdl_sfname = shellquote(sfname)
+    cmdl_tfname = shellquote(tfname)
+    cmdl_spec = direction + ':' + coord_string
+
+    cmdl_total = [progname, cmdl_opts, cmdl_sfname, cmdl_tfname, cmdl_spec]
+    
+    return (' '.join(cmdl_total))
 
 
 def shellquote(s):
-    return "'" + s.replace("'", "'\\''") + "'"
+    """Escapes file names for the shell."""
+    return ("'" + s.replace("'", "'\\''") + "'")
 
 
 register(
     "python_pixi",
-    "pixelize the selection using jpegpixi",
-    "pixelize the selection using jpegpixi",
+    "Pixelize the selection using jpegpixi.",
+    """Pixelize the selection using jpegpixi.  Makes GIMP serve as a GUI for jpegpixi.
+    It calls jpegpixi on _the file_ by the name of the loaded image, not on the
+    drawable in GIMP, so any unsaved changes will be ignored.
+    """,
     "Aleksej",
     "Aleksej",
     "2012",
@@ -143,11 +176,11 @@ register(
         # Maximum selecton size, to prevent "out-of-memory" issues.
         (PF_SLIDER, 'max_selection_size', 'Max. sel. size', 10000,
             (10000, 100000, 100)),
-        (PF_RADIO, 'rename_method', 'Target file naming', 'rect_coords',
+        (PF_RADIO, 'rename_method', 'Target file\nnaming', 'rect_coords',
             (('Coords+dims', 'rect_coords'),
                 ('add suffix (like CropGUI)', 'cropgui'),
                 ("increment number at suffix", "incremental"))),
-        (PF_STRING, 'fn_sufbase', 'Filename suffix base', '-pixi')
+        (PF_STRING, 'fn_sufbase', 'Filename\nsuffix base', '-pixi')
     ],
     [],
     python_pixi)
