@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from os import system
 from gimpfu import *
 
@@ -92,7 +91,7 @@ def next_filename(sfname, rename_method, fn_sufbase, coords):
     """Generates the target filename out of the source one and other
     data using the method specified.
     """    
-    sfname_base, sfname_ext = sfname.rsplit('.', 2)
+    sfname_base, sfname_ext = sfname.rsplit('.', 1)
 
     if rename_method == 'rect_coords':
         id_from_coord_string = 'x'.join(map(lambda x: str(x), coords))
