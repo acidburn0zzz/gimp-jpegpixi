@@ -37,6 +37,7 @@ def python_pixi(timg, tdrawable, method, direction,
     grid_spacing = pdb.gimp_image_grid_get_spacing(timg)
 
     if not have_selection:
+        set_grid(timg)
         pdb.gimp_message("A selection is required.")
     elif not ((grid_offset, grid_spacing) ==
               ((0, 0), REQUIRED_GRID_SPACING)):
