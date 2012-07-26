@@ -37,11 +37,11 @@ def python_pixi(timg, tdrawable, method, direction,
     if not have_selection:
         pdb.gimp_message("A selection is required.")
     elif not ((grid_offset, grid_spacing) ==
-              ((0, 0), (required_grid_spacing[0], required_grid_spacing[1]))):
+              ((0, 0), required_grid_spacing)):
         pdb.gimp_message_set_handler(ERROR_CONSOLE)
         pdb.gimp_message(
             "Grid offset and spacing are not 0, 0 and %d, %d.  Fixing, but please retry." %
-                (required_grid_spacing[0], required_grid_spacing[1]))
+                required_grid_spacing)
         pdb.gimp_image_grid_set_offset(timg, 0, 0) 
         pdb.gimp_image_grid_set_spacing(timg, required_grid_spacing[0],
                                         required_grid_spacing[1]) 
