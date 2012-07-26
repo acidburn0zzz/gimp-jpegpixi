@@ -18,44 +18,44 @@
 from os import system
 from gimpfu import *
 
+# The grid spacing needed to match DCT blocks (to help user choose
+# a less lossy position).
+#
+# Wikipedia says DCT blocks are 8x8.  It also says some lossless
+# operations can be performed on MCU blocks, which are usually
+# 16x16.  If it's only MCU and not DCT, it would be more
+# convenient to use the MCU size here, but jpegpixi's man page
+# says DCT.
+REQUIRED_GRID_SPACING = (8, 8)
+
+
 def python_pixi(timg, tdrawable, method, direction,
                 max_selection_size, rename_method, fn_sufbase):
     have_selection = pdb.gimp_selection_bounds(timg)[0]
 
-    # The grid spacing needed to match DCT blocks (to help user choose
-    # a less lossy position).
-    #
-    # Wikipedia says DCT blocks are 8x8.  It also says some lossless
-    # operations can be performed on MCU blocks, which are usually
-    # 16x16.  If it's only MCU and not DCT, it would be more
-    # convenient to use the MCU size here, but jpegpixi's man page
-    # says DCT.
-    required_grid_spacing = (8, 8)
     grid_offset = pdb.gimp_image_grid_get_offset(timg)
     grid_spacing = pdb.gimp_image_grid_get_spacing(timg)
 
     if not have_selection:
         pdb.gimp_message("A selection is required.")
     elif not ((grid_offset, grid_spacing) ==
-              ((0, 0), required_grid_spacing)):
+              ((0, 0), REQUIRED_GRID_SPACING)):
         pdb.gimp_message_set_handler(ERROR_CONSOLE)
         pdb.gimp_message(
             "Grid offset and spacing are not 0, 0 and %d, %d.  Fixing, but please retry." %
-                required_grid_spacing)
-        set_grid(timg, required_grid_spacing)
+                REQUIRED_GRID_SPACING)
+        set_grid(timg)
 
         return
     else:
         we_have_a_selection(timg, tdrawable, method, direction,
-                            max_selection_size, fn_sufbase, rename_method,
-                            required_grid_spacing)
+                            max_selection_size, fn_sufbase, rename_method)
         return
 
 
 
 def we_have_a_selection(timg, tdrawable, method, direction,
-                        max_selection_size, fn_sufbase, rename_method,
-                        required_grid_spacing):
+                        max_selection_size, fn_sufbase, rename_method):
 
     x1, y1, sx, sy = rect_coords(pdb.gimp_selection_bounds(timg)[1:])
     selection_size = sx * sy
@@ -88,19 +88,19 @@ def we_have_a_selection(timg, tdrawable, method, direction,
         pdb.gimp_image_select_rectangle(
             targetimg, CHANNEL_OP_REPLACE, x1, y1, sx, sy)
 
-        set_grid(targetimg, required_grid_spacing)
+        set_grid(targetimg)
 
         return
 
 
-def set_grid(timg, required_grid_spacing):
+def set_grid(timg):
     """Sets grid parameters for convenient selection.  This only has
     effect on the specified image and does not affect the default values
     set in GIMP preferences.
     """
     pdb.gimp_image_grid_set_offset(timg, 0, 0) 
-    pdb.gimp_image_grid_set_spacing(timg, required_grid_spacing[0],
-                                        required_grid_spacing[1]) 
+    pdb.gimp_image_grid_set_spacing(timg, REQUIRED_GRID_SPACING[0],
+                                        REQUIRED_GRID_SPACING[1]) 
 
 
 def next_filename(sfname, rename_method, fn_sufbase, coords):
