@@ -1,0 +1,20 @@
+A GIMP plug-in to use GIMP as a GUI for jpegpixi.
+
+jpegpixi is a program to interpolate pixels in JFIF (JPEG) image files,
+only changing the relevant DCT blocks.
+
+This plug-in for GIMP allows choosing:
+* the area (using a rectangular selection);
+* method;
+* how to generate the result's file name.
+
+When you run the plug-in after making a selection, it opens an options
+window where you can choose the above.
+
+The main operation of the plug-in consists in running jpegpixi on the
+image currently loaded in GIMP, and opening the resultin file in a new
+window.
+
+There is a quirk concerning grid settings: if the grid is not 8x8, the
+plug-in will change it to 8x8 and abort, needing to be started again.
+
