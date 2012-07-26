@@ -42,18 +42,20 @@ def python_pixi(timg, tdrawable, method, direction,
         pdb.gimp_message(
             "Grid offset and spacing are not 0, 0 and %d, %d.  Fixing, but please retry." %
                 required_grid_spacing)
-        pdb.gimp_image_grid_set_offset(timg, 0, 0) 
-        pdb.gimp_image_grid_set_spacing(timg, required_grid_spacing[0],
-                                        required_grid_spacing[1]) 
+        set_grid(timg, required_grid_spacing)
+
         return
     else:
         we_have_a_selection(timg, tdrawable, method, direction,
-                            max_selection_size, fn_sufbase, rename_method)
+                            max_selection_size, fn_sufbase, rename_method,
+                            required_grid_spacing)
         return
 
 
+
 def we_have_a_selection(timg, tdrawable, method, direction,
-                        max_selection_size, fn_sufbase, rename_method):
+                        max_selection_size, fn_sufbase, rename_method,
+                        required_grid_spacing):
 
     x1, y1, sx, sy = rect_coords(pdb.gimp_selection_bounds(timg)[1:])
     selection_size = sx * sy
@@ -81,10 +83,24 @@ def we_have_a_selection(timg, tdrawable, method, direction,
         targetimg = pdb.file_jpeg_load(tfname, RUN_INTERACTIVE)
         gimp.Display(targetimg)
         tdrawable.flush()
+
+        # Select the interpolated part in the new window.
         pdb.gimp_image_select_rectangle(
             targetimg, CHANNEL_OP_REPLACE, x1, y1, sx, sy)
-        # XXX I suppose the grid is the same as the one in the original image.
+
+        set_grid(targetimg, required_grid_spacing)
+
         return
+
+
+def set_grid(timg, required_grid_spacing):
+    """Sets grid parameters for convenient selection.  This only has
+    effect on the specified image and does not affect the default values
+    set in GIMP preferences.
+    """
+    pdb.gimp_image_grid_set_offset(timg, 0, 0) 
+    pdb.gimp_image_grid_set_spacing(timg, required_grid_spacing[0],
+                                        required_grid_spacing[1]) 
 
 
 def next_filename(sfname, rename_method, fn_sufbase, coords):
@@ -108,6 +124,7 @@ def next_filename(sfname, rename_method, fn_sufbase, coords):
         tfname = sfname_base + fn_sufbase + "." + sfname_ext
 
     return tfname
+
 
 def next_filename_incremental(sfname_base, sfname_ext, fn_sufbase):
     """If the file name base ends in "-pixi<n>", makes it "-pixi<n+1>".  Adds
