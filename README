@@ -12,7 +12,7 @@ When you run the plug-in after making a selection, it opens an options
 window where you can choose the above.
 
 The main operation of the plug-in consists in running jpegpixi on the
-image currently loaded in GIMP, and opening the resultin file in a new
+image currently loaded in GIMP, and opening the resulting file in a new
 window.
 
 There is a quirk concerning grid settings: if the grid is not 8x8, the
