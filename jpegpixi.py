@@ -43,8 +43,8 @@ def python_pixi(timg, tdrawable, method, direction,
               ((0, 0), REQUIRED_GRID_SPACING)):
         pdb.gimp_message_set_handler(ERROR_CONSOLE)
         pdb.gimp_message(
-            "Grid offset and spacing are not 0, 0 and %d, %d.  Fixing, but please retry." %
-                REQUIRED_GRID_SPACING)
+            "Grid offset and spacing are not 0, 0 and {0}, {1}. \
+                Fixing, but please retry.".format(*REQUIRED_GRID_SPACING))
         set_grid(timg)
 
         return
@@ -60,11 +60,16 @@ def we_have_a_selection(timg, tdrawable, method, direction,
 
     x1, y1, sx, sy = rect_coords(pdb.gimp_selection_bounds(timg)[1:])
     selection_size = sx * sy
+    max_selection_size = int(max_selection_size)
+
     if selection_size > max_selection_size:
         pdb.gimp_message_set_handler(ERROR_CONSOLE)
         pdb.gimp_message(
-            "Selection is %d pixels, over %d.  Aborting for safety." %
-                (selection_size, max_selection_size))
+            "Selection is {0} pixels, {1:.1f} times the maximum of {2}. \
+            Aborting for safety.".format(
+                selection_size,
+                selection_size/max_selection_size,
+                max_selection_size))
         return
     else:
         # source and target file names
@@ -72,7 +77,7 @@ def we_have_a_selection(timg, tdrawable, method, direction,
         tfname = next_filename(sfname, rename_method, fn_sufbase,
                                (x1, y1, sx, sy))
 
-        coord_string = "%i,%i,%i,%i" % (x1, y1, sx, sy)
+        coord_string = "{0},{1},{2},{3}".format(x1, y1, sx, sy)
         the_command = jpegpixi_cmd(sfname, tfname, coord_string,
                                    method, direction)
 
@@ -95,9 +100,10 @@ def we_have_a_selection(timg, tdrawable, method, direction,
 
 
 def set_grid(timg):
-    """Sets grid parameters for convenient selection.  This only has
-    effect on the specified image and does not affect the default values
-    set in GIMP preferences.
+    """Sets grid parameters for convenient selection.
+
+    This only has effect on the specified image and does not affect the
+    default values set in GIMP preferences.
     """
     pdb.gimp_image_grid_set_offset(timg, 0, 0) 
     pdb.gimp_image_grid_set_spacing(timg, REQUIRED_GRID_SPACING[0],
@@ -128,8 +134,9 @@ def next_filename(sfname, rename_method, fn_sufbase, coords):
 
 
 def next_filename_incremental(sfname_base, sfname_ext, fn_sufbase):
-    """If the file name base ends in "-pixi<n>", makes it "-pixi<n+1>".  Adds
-    "-pixi1" if there is no "-pixi".
+    """With "-pixi" as the suffix base, if the file name base ends in
+    "-pixi<n>", makes it "-pixi<n+1>".  Adds "-pixi1" if there is no
+    "-pixi".
     """
     (fn_presuf, fn_hopefully_sufbase,
         fn_hopefully_number) = sfname_base.rpartition(fn_sufbase)
@@ -175,9 +182,10 @@ def shellquote(s):
 register(
     "python_pixi",
     "Pixelize the selection using jpegpixi.",
-    """Pixelize the selection using jpegpixi.  Makes GIMP serve as a GUI for jpegpixi.
-    It calls jpegpixi on _the file_ by the name of the loaded image, not on the
-    drawable in GIMP, so any unsaved changes will be ignored.
+    """Pixelize the selection using jpegpixi.  Makes GIMP serve as a
+    GUI for jpegpixi. It calls jpegpixi on _the file_ by the name of
+    the loaded image, not on the drawable in GIMP, so any unsaved
+    changes will be ignored.
     """,
     "Aleksej",
     "Aleksej",
