@@ -117,11 +117,11 @@ def next_filename(sfname, rename_method, fn_sufbase, coords):
     sfname_base, sfname_ext = path.splitext(sfname)
 
     if rename_method == 'rect_coords':
-        id_from_coord_string = 'x'.join(map(lambda x: str(x), coords))
+        id_from_coord_string = 'x'.join(str(x) for x in coords)
         tfname = (sfname_base + fn_sufbase + id_from_coord_string + "." +
             sfname_ext)
     elif rename_method == 'rect_coords_hex':
-        id_from_coord_string = 'x'.join(map(lambda x: hex(x), coords))
+        id_from_coord_string = 'x'.join(hex(x) for x in coords)
         tfname = (sfname_base + fn_sufbase + id_from_coord_string + "." +
             sfname_ext)
     elif rename_method == 'incremental':
