@@ -16,7 +16,14 @@
 # limitations under the License.
 
 from os import system, path
-from gimpfu import *
+import sys
+
+try:
+    from gimpfu import *
+except ImportError:
+    sys.stderr.write(
+        "This program is a GIMP plug-in and cannot be used standalone.\n")
+    sys.exit(1)
 
 # The grid spacing needed to match DCT blocks (to help user choose
 # a less lossy position).
