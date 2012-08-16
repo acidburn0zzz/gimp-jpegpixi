@@ -20,10 +20,11 @@ import sys
 
 try:
     from gimpfu import *
+    in_gimp = True
 except ImportError:
+    in_gimp = False
     sys.stderr.write(
-        "This program is a GIMP plug-in and cannot be used standalone.\n")
-    sys.exit(1)
+        'This program is a GIMP plug-in and cannot be used standalone.\n')
 
 # The grid spacing needed to match DCT blocks (to help user choose
 # a less lossy position).
@@ -145,6 +146,16 @@ def next_filename_incremental(sfname_base, sfname_ext, fn_sufbase):
     """With "-pixi" as the suffix base, if the file name base ends in
     "-pixi<n>", makes it "-pixi<n+1>".  Adds "-pixi1" if there is no
     "-pixi".
+
+    >>> next_filename_incremental("DSCN1234", "jpeg", "-pixi")
+    'DSCN1234-pixi1.jpeg'
+
+    >>> next_filename_incremental("z-pixi", "jpeg", "-pixi")
+    'z-pixi1.jpeg'
+
+    >>> next_filename_incremental("lorem.ipsum..dolor..sit.amet-pixi23", "jpg", "-pixi")
+    'lorem.ipsum..dolor..sit.amet-pixi24.jpg'
+
     """
     (fn_presuf, fn_hopefully_sufbase,
         fn_hopefully_number) = sfname_base.rpartition(fn_sufbase)
@@ -152,7 +163,10 @@ def next_filename_incremental(sfname_base, sfname_ext, fn_sufbase):
     if fn_presuf == "":
         tfname = sfname_base + fn_sufbase + '1.' + sfname_ext
     else:
-        fn_number = int(fn_hopefully_number)
+        try:
+            fn_number = int(fn_hopefully_number)
+        except ValueError:
+            fn_number = 0
         fn_number += 1
         tfname = fn_presuf + fn_sufbase + str(fn_number) + '.' + sfname_ext
 
@@ -187,36 +201,41 @@ def shellquote(s):
     return ("'" + s.replace("'", "'\\''") + "'")
 
 
-register(
-    "python_pixi",
-    "Pixelize the selection using jpegpixi.",
-    """Pixelize the selection using jpegpixi.  Makes GIMP serve as a
-    GUI for jpegpixi. It calls jpegpixi on _the file_ by the name of
-    the loaded image, not on the drawable in GIMP, so any unsaved
-    changes will be ignored.
-    """,
-    "Aleksej",
-    "Aleksej",
-    "2012",
-    "<Image>/Filters/Blur/_jpegpixi",
-    "RGB*, GRAY*",
-    [
-        (PF_RADIO, 'method', 'Interpolation\n method', "li",
-            (("average", "av"), ("linear", "li"), ("quadratic", "qu"),
-                ("cubic", "cu"))),
-        (PF_RADIO, 'direction', 'Direction', "2", (("2d", "2"),
-            ("1d vertical", "v"), ("1d horizontal", "h"))),
-        # Maximum selecton size, to prevent "out-of-memory" issues.
-        (PF_SLIDER, 'max_selection_size', 'Max. sel. size', 10000,
-            (10000, 100000, 100)),
-        (PF_RADIO, 'rename_method', 'Target file\nnaming', 'rect_coords',
-            (('Coords+dims', 'rect_coords'),
-             ('add suffix (like CropGUI)', 'cropgui'),
-             ("increment number at suffix", "incremental"))),
-        (PF_STRING, 'fn_sufbase', 'Filename\nsuffix base', '-pixi')
-    ],
-    [],
-    python_pixi)
+if in_gimp:
 
-main()
+    register(
+        "python_pixi",
+        "Pixelize the selection using jpegpixi.",
+        """Pixelize the selection using jpegpixi.  Makes GIMP serve as a
+        GUI for jpegpixi. It calls jpegpixi on _the file_ by the name of
+        the loaded image, not on the drawable in GIMP, so any unsaved
+        changes will be ignored.
+        """,
+        "Aleksej",
+        "Aleksej",
+        "2012",
+        "<Image>/Filters/Blur/_jpegpixi",
+        "RGB*, GRAY*",
+        [
+            (PF_RADIO, 'method', 'Interpolation\n method', "li",
+                (("average", "av"), ("linear", "li"), ("quadratic", "qu"),
+                    ("cubic", "cu"))),
+            (PF_RADIO, 'direction', 'Direction', "2", (("2d", "2"),
+                ("1d vertical", "v"), ("1d horizontal", "h"))),
+            # Maximum selecton size, to prevent "out-of-memory" issues.
+            (PF_SLIDER, 'max_selection_size', 'Max. sel. size', 10000,
+                (10000, 100000, 100)),
+            (PF_RADIO, 'rename_method', 'Target file\nnaming', 'rect_coords',
+                (('Coords+dims', 'rect_coords'),
+                 ('add suffix (like CropGUI)', 'cropgui'),
+                 ("increment number at suffix", "incremental"))),
+            (PF_STRING, 'fn_sufbase', 'Filename\nsuffix base', '-pixi')
+        ],
+        [],
+        python_pixi)
+
+    main()
+else:
+    import doctest
+    doctest.testmod()
 
