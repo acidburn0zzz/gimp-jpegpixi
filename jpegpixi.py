@@ -88,7 +88,7 @@ def we_have_a_selection(timg, tdrawable, method, direction,
         the_command = jpegpixi_cmd(sfname, tfname, coord_string,
                                    method, direction)
 
-        print the_command
+        print 'Running', the_command
 
         system(the_command)
 
@@ -128,6 +128,7 @@ def next_filename(sfname, rename_method, fn_sufbase, coords):
         tfname = (sfname_base + fn_sufbase + id_from_coord_string + "." +
             sfname_ext)
     elif rename_method == 'rect_coords_hex':
+        # currently not exposed in the GUI
         id_from_coord_string = 'x'.join(hex(x) for x in coords)
         tfname = (sfname_base + fn_sufbase + id_from_coord_string + "." +
             sfname_ext)
@@ -210,8 +211,8 @@ register(
             (10000, 100000, 100)),
         (PF_RADIO, 'rename_method', 'Target file\nnaming', 'rect_coords',
             (('Coords+dims', 'rect_coords'),
-                ('add suffix (like CropGUI)', 'cropgui'),
-                ("increment number at suffix", "incremental"))),
+             ('add suffix (like CropGUI)', 'cropgui'),
+             ("increment number at suffix", "incremental"))),
         (PF_STRING, 'fn_sufbase', 'Filename\nsuffix base', '-pixi')
     ],
     [],
