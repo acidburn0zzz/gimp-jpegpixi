@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from os import system, path
+from os import path
+from subprocess import call
 import sys
 
 try:
@@ -91,7 +92,7 @@ def we_have_a_selection(timg, tdrawable, method, direction,
 
         print 'Running', the_command
 
-        system(the_command)
+        call(the_command, shell=True)
 
         # Load the new image in a new window.
         targetimg = pdb.file_jpeg_load(tfname, RUN_INTERACTIVE)
