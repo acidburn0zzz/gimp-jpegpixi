@@ -16,7 +16,7 @@
 # limitations under the License.
 
 from os import path
-from subprocess import call
+from subprocess import check_call
 import sys
 
 try:
@@ -92,7 +92,7 @@ def we_have_a_selection(timg, tdrawable, method, direction,
 
         print 'Running', the_command
 
-        call(the_command, shell=True)
+        check_call(the_command)
 
         # Load the new image in a new window.
         targetimg = pdb.file_jpeg_load(tfname, RUN_INTERACTIVE)
@@ -187,19 +187,11 @@ def rect_coords(points_coords):
 def jpegpixi_cmd(sfname, tfname, coord_string, method, direction):
     """Returns the shell command ready to execute."""
     progname = "jpegpixi"
-    cmdl_opts = cmdl_method = "-m " + method
-    cmdl_sfname = shellquote(sfname)
-    cmdl_tfname = shellquote(tfname)
     cmdl_spec = direction + ':' + coord_string
 
-    cmdl_total = [progname, cmdl_opts, cmdl_sfname, cmdl_tfname, cmdl_spec]
+    cmdl_total = [progname, '-m', method, sfname, tfname, cmdl_spec]
     
-    return (' '.join(cmdl_total))
-
-
-def shellquote(s):
-    """Escapes file names for the shell."""
-    return ("'" + s.replace("'", "'\\''") + "'")
+    return cmdl_total
 
 
 if in_gimp:
