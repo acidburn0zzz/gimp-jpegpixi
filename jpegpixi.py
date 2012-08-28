@@ -50,19 +50,12 @@ def python_pixi(timg, tdrawable, method, direction,
     grid_spacing = pdb.gimp_image_grid_get_spacing(timg)
 
     set_grid(timg)
-    if not have_selection:
-        pdb.gimp_message(_("A selection is required."))
-    elif not ((grid_offset, grid_spacing) ==
-              ((0, 0), REQUIRED_GRID_SPACING)):
-        pdb.gimp_message_set_handler(ERROR_CONSOLE)
-        pdb.gimp_message(
-            _("Grid offset and spacing are not 0, 0 and {0}, {1}.  Fixing, but please retry.").format(*REQUIRED_GRID_SPACING))
-        set_grid(timg)
 
-        return
-    else:
+    if have_selection:
         we_have_a_selection(timg, tdrawable, method, direction,
                             max_selection_size, fn_sufbase, rename_method)
+    else:
+        pdb.gimp_message(_("A selection is required."))
 
 
 def we_have_a_selection(timg, tdrawable, method, direction,

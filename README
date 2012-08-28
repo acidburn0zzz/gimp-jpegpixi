@@ -15,8 +15,7 @@ The main operation of the plug-in consists in running jpegpixi on the
 image currently loaded in GIMP, and opening the resulting file in a new
 window.
 
-There is a quirk concerning grid settings: if the grid is not 8x8, the
-plug-in will change it to 8x8 and abort, needing to be started again.
-This is intentional (maybe you forgot the need for the grid and started
-selecting), but can be changed if not worth it.
+Whether or not there is a selection, if the grid is not 8x8, the
+plug-in will change it to 8x8, so that you can choose between
+pixelizing more pixels and touching fewer blocks.
 
