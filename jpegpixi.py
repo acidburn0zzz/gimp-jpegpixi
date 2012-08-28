@@ -19,13 +19,17 @@ from os import path
 from subprocess import check_call
 import sys
 
+
+def _(x):
+    return x
+
 try:
     from gimpfu import *
     in_gimp = True
 except ImportError:
     in_gimp = False
     sys.stderr.write(
-        'This program is a GIMP plug-in and cannot be used standalone.\n')
+        _('This program is a GIMP plug-in and cannot be used standalone.\n'))
 
 # The grid spacing needed to match DCT blocks (to help user choose
 # a less lossy position).
@@ -46,14 +50,12 @@ def python_pixi(timg, tdrawable, method, direction,
     grid_spacing = pdb.gimp_image_grid_get_spacing(timg)
 
     if not have_selection:
-        set_grid(timg)
-        pdb.gimp_message("A selection is required.")
+        pdb.gimp_message(_("A selection is required."))
     elif not ((grid_offset, grid_spacing) ==
               ((0, 0), REQUIRED_GRID_SPACING)):
         pdb.gimp_message_set_handler(ERROR_CONSOLE)
         pdb.gimp_message(
-            "Grid offset and spacing are not 0, 0 and {0}, {1}. \
-                Fixing, but please retry.".format(*REQUIRED_GRID_SPACING))
+            _("Grid offset and spacing are not 0, 0 and {0}, {1}.  Fixing, but please retry.").format(*REQUIRED_GRID_SPACING))
         set_grid(timg)
 
         return
@@ -74,8 +76,7 @@ def we_have_a_selection(timg, tdrawable, method, direction,
     if selection_size > max_selection_size:
         pdb.gimp_message_set_handler(ERROR_CONSOLE)
         pdb.gimp_message(
-            "Selection is {0} pixels, {1:.1f} times the maximum of {2}. \
-            Aborting for safety.".format(
+            _("Selection is {0} pixels, {1:.1f} times the maximum of {2}.  Aborting for safety.").format(
                 selection_size,
                 selection_size/max_selection_size,
                 max_selection_size))
@@ -90,7 +91,7 @@ def we_have_a_selection(timg, tdrawable, method, direction,
         the_command = jpegpixi_cmd(sfname, tfname, coord_string,
                                    method, direction)
 
-        print 'Running', the_command
+        print _('Running'), the_command
 
         check_call(the_command)
 
@@ -198,7 +199,7 @@ if in_gimp:
 
     register(
         "python_pixi",
-        "Pixelize the selection using jpegpixi.",
+        _("Pixelize the selection using jpegpixi."),
         """Pixelize the selection using jpegpixi.  Makes GIMP serve as a
         GUI for jpegpixi. It calls jpegpixi on _the file_ by the name of
         the loaded image, not on the drawable in GIMP, so any unsaved
