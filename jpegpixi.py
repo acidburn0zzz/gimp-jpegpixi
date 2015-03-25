@@ -210,7 +210,7 @@ if in_gimp:
                 ("1d vertical", "v"), ("1d horizontal", "h"))),
             # Maximum selecton size, to prevent "out-of-memory" issues.
             (PF_SLIDER, 'max_selection_size', 'Max. sel. size', 10000,
-                (10000, 100000, 100)),
+                (10000, 400000, 100)),
             (PF_RADIO, 'rename_method', 'Target file\nnaming', 'rect_coords',
                 (('Coords+dims', 'rect_coords'),
                  ('add suffix (like CropGUI)', 'cropgui'),
