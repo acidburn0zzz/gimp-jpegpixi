@@ -83,7 +83,7 @@ def we_have_a_selection(timg, tdrawable, method, direction,
         the_command = jpegpixi_cmd(sfname, tfname, coord_string,
                                    method, direction)
 
-        print _('Running'), the_command
+        print (_('Running'), the_command)
 
         check_call(the_command)
 
